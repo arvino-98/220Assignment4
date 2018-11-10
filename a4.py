@@ -83,11 +83,15 @@ Utilities
 '''
 '''
 neighbors
-Returns the number of neighbers of a node in a graph
+Returns a list of neighbers of a node in a graph
 '''
 def neighbors(graph, root):
     return list(nx.all_neighbors(graph, root))
 
+'''
+numberOfNeighbors
+Returns number of neighbors -_-
+'''
 def numberOfNeighbors(graph, root):
     return len(list(nx.all_neighbors(graph, root)))
 
