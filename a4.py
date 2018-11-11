@@ -35,7 +35,7 @@ for i in range(numOfTestCases):
     print("test case " + str(i + 1))
     G = nx.Graph()
 
-    # get int value from the line
+    # get int values from the line
     print(rawInputArray[lineNum])
     numberOfLinks = int(rawInputArray[lineNum][1])
     numberOfParties = int(rawInputArray[lineNum][2])
@@ -43,11 +43,11 @@ for i in range(numOfTestCases):
 
     testCaseBudgets.append(numberOfParties)
 
-    # slice array from first friendship link to last freindship link
+    # slice array from first friendship link to last friendship link
     testCaseLinkSlice = rawInputArray[lineNum + 1:(lineNum + numberOfLinks + 1)]
     linkSliceLength = len(testCaseLinkSlice)
 
-    # for each row of input in a slice
+    # creating graphs and appending to graph array
     for j in range(linkSliceLength):
         person1 = testCaseLinkSlice[j][0]
         person2 = testCaseLinkSlice[j][1]
@@ -56,20 +56,21 @@ for i in range(numOfTestCases):
         G.add_edge(person1, person2)
         G.add_node(person1, depth=-1)
         G.add_node(person2, depth=-1)
-
     testCaseGraphs.append(G)
 
+    # moving to lines that specify host id's
     lineNum += (numberOfLinks + 1)
     testCaseHostSlice = rawInputArray[lineNum:(lineNum + numberOfHosts)]
     hostSliceLength = len(testCaseHostSlice)
 
+    # appending host id's to array
     hostIds = []
     for k in range(hostSliceLength):
         hostIds.append(testCaseHostSlice[k][0])
         print(testCaseHostSlice[k][0])
-
     testCaseHostIDs.append(hostIds)
 
+    # moving to next line that has test case specifications
     lineNum += numberOfHosts
 
     print("End test case")
@@ -82,12 +83,6 @@ End Parsing
 Utilities
 ////////////////////////////////////////////////////////
 '''
-'''
-neighbors
-Returns a list of neighbers of a node in a graph
-'''
-def neighbors(graph, root):
-    return list(nx.all_neighbors(graph, root))
 
 '''
 numberOfNeighbors
@@ -107,6 +102,7 @@ def mostNeighbors(graph):
         if numberOfNeighbors(graph, node) > maxNeighbors:
             maxNeighbors = numberOfNeighbors(graph, node)
             retNode = node
+        # break ties by lower ID
         elif numberOfNeighbors(graph, node) == maxNeighbors:
             if (node < retNode):
                 retNode = node
@@ -123,6 +119,7 @@ def mostAwkward(graph):
         if graph.nodes[node]["depth"] > maxAwkward:
             maxAwkward = graph.nodes[node]["depth"]
             retNode = node
+        # break ties by lower ID
         elif graph.nodes[node]["depth"] == maxAwkward:
             if (node < retNode):
                 retNode = node
@@ -146,14 +143,14 @@ def setNodeDepths(graph, root):
         elif (shortestPath < graph.nodes[node]["depth"]):
             graph.nodes[node]["depth"] = shortestPath
 '''
-sumDepths
+sumOfDepths
 Sum of all node depths
 '''
-def sumDepths(graph):
-    sumDepths = 0
+def sumOfDepths(graph):
+    sumOfDepths = 0
     for node in graph.nodes:
-        sumDepths += float(graph.nodes[node]["depth"])
-    return sumDepths
+        sumOfDepths += float(graph.nodes[node]["depth"])
+    return sumOfDepths
 
 '''
 computeSocialAwkwardness
@@ -162,7 +159,7 @@ Compute social awkwardness for the case that M hosts are given
 def computeSocialAwkwardness(graph, hostIds):
     for id in hostIds:
         setNodeDepths(graph, id)
-    return '{:.2f}'.format(round((sumDepths(graph) / (nx.number_of_nodes(graph) - len(hostIds))), 2))
+    return '{:.2f}'.format(round((sumOfDepths(graph) / (nx.number_of_nodes(graph) - len(hostIds))), 2))
 '''
 ////////////////////////////////////////////////////////
 End Utilities
