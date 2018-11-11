@@ -9,6 +9,7 @@ rawInputArray = []
 with open(inputFile) as f:
     for line in f:
         rawInputArray.append(line.split())
+print rawInputArray
 '''
 ////////////////////////////////////////////////////////
 End raw input
@@ -20,7 +21,7 @@ Parsing input into graphs
 '''
 # all arrays map 1-1 to each other, and hold graphs, budgets, and host Id's respectively
 testCaseGraphs = []
-testCaseBudget = []
+testCaseBudgets = []
 testCaseHostIDs = []
 
 # number of test cases is always first line of input
@@ -40,7 +41,7 @@ for i in range(numOfTestCases):
     numberOfParties = int(rawInputArray[lineNum][2])
     numberOfHosts = int(rawInputArray[lineNum][3])
 
-    testCaseBudget.append(numberOfParties)
+    testCaseBudgets.append(numberOfParties)
 
     # slice array from first friendship link to last freindship link
     testCaseLinkSlice = rawInputArray[lineNum + 1:(lineNum + numberOfLinks + 1)]
@@ -129,7 +130,9 @@ def mostAwkward(graph):
 
 '''
 setNodeDepths
-Sets node depth on a graph for every node from root
+Sets node depth on a graph for every node from root.
+Since this function modifies the given graph, it is important to
+work with copies if working on the same graph more than once
 '''
 def setNodeDepths(graph, root):
     for node in graph.nodes:
@@ -151,6 +154,15 @@ def sumDepths(graph):
     for node in graph.nodes:
         sumDepths += float(graph.nodes[node]["depth"])
     return sumDepths
+
+'''
+computeSocialAwkwardness
+Compute social awkwardness for the case that M hosts are given
+'''
+def computeSocialAwkwardness(graph, hostIds):
+    for id in hostIds:
+        setNodeDepths(graph, id)
+    return '{:.2f}'.format(round((sumDepths(graph) / (nx.number_of_nodes(graph) - len(hostIds))), 2))
 '''
 ////////////////////////////////////////////////////////
 End Utilities
@@ -179,11 +191,12 @@ them a party host. Repeat until M party hosts have been assigned. Ties should be
 resolved by choosing the person with a lower numerical ID.
 '''
 def assignmentHeuristicTwo(graph, budget):
+    localGraphCopy = graph
     hosts = []
-    hosts.append(mostNeighbors(graph))
+    hosts.append(mostNeighbors(localGraphCopy))
     while len(hosts) < budget:
-        setNodeDepths(graph, hosts[len(hosts) - 1])
-        hosts.append(mostAwkward(graph))
+        setNodeDepths(localGraphCopy, hosts[len(hosts) - 1])
+        hosts.append(mostAwkward(localGraphCopy))
     return hosts
 
 '''
@@ -198,41 +211,33 @@ End Heuristics
 '''
 
 '''
-computeHostsAssigned
-Compute social awkwardness for the case that M hosts are given
-'''
-def computeHostsAssigned(graph, hostIds):
-    for id in hostIds:
-        setNodeDepths(graph, id)
-    return round((sumDepths(graph) / (nx.number_of_nodes(graph) - len(hostIds))), 2)
-
-'''
-computeFixedBudget
-Compute social awkwardness for the case with a fixed budget and assigned
-hosts are not yet set
-'''
-def computeFixedBudget(graph, budget):
-    hostIds = assignmentHeuristicTwo(graph, budget)
-    #print(hostIds)
-    return computeHostsAssigned(graph, hostIds)
-
-'''
-Main social awkwardness calculator that checks the number of host Id's
-and calls proper compute function
-'''
-def computeSocialAwkwardness(graph, budget, hostIds):
-    numberOfHosts = len(hostIds)
-    if numberOfHosts == 0:
-        return computeFixedBudget(graph, budget)
-    elif numberOfHosts >= 1:
-        return computeHostsAssigned(graph, hostIds)
-
-'''
-Testing
+Writing output
 ////////////////////////////////////////////////////////
 '''
-print("TESTS--------------------------------")
-print(computeSocialAwkwardness(testCaseGraphs[0], testCaseBudget[0],testCaseHostIDs[0]))
-print(computeSocialAwkwardness(testCaseGraphs[1], testCaseBudget[1], testCaseHostIDs[1]))
-print(computeSocialAwkwardness(testCaseGraphs[2], testCaseBudget[2], testCaseHostIDs[2]))
-print(computeSocialAwkwardness(testCaseGraphs[3], testCaseBudget[3], testCaseHostIDs[3]))
+def writeHeuristicOne(graph, budget):
+    h1copy = graph.copy()
+    heuristicOneHostIds = assignmentHeuristicOne(h1copy, testCaseBudgets[i])
+    output.write("Heuristic 1 hosts are ")
+    output.write(str(heuristicOneHostIds) + "\n")
+    output.write("Average social awkwardness = ")
+    output.write(str(computeSocialAwkwardness(h1copy, heuristicOneHostIds)) + "\n")
+
+def writeHeuristicTwo(graph, budget):
+    h2copy = graph.copy()
+    heuristicTwoHostIds = assignmentHeuristicTwo(h2copy, testCaseBudgets[i])
+    output.write("Heuristic 2 hosts are ")
+    output.write(str(heuristicTwoHostIds) + "\n")
+    output.write("Average social awkwardness = ")
+    output.write(str(computeSocialAwkwardness(h2copy, heuristicTwoHostIds)) + "\n")
+
+output = open("output.txt", "w")
+for i, graph in enumerate(testCaseGraphs):
+    output.write("Test case " + str(i+1) + ".\n")
+    if len(testCaseHostIDs[i]) == 0:
+        writeHeuristicOne(testCaseGraphs[i], testCaseBudgets[i])
+        writeHeuristicTwo(testCaseGraphs[i], testCaseBudgets[i])
+
+    elif len(testCaseHostIDs[i]) >= 1:
+        output.write("Average social awkwardness = ")
+        output.write(str(computeSocialAwkwardness(testCaseGraphs[i], testCaseHostIDs[i])))
+        output.write("\n")
