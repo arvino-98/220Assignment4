@@ -195,6 +195,8 @@ lower numerical ID.
 '''
 def assignmentHeuristicOne(graph, budget):
     nodes = list(graph.nodes)
+    # python sort is stable so sort by id, then by number of neighbors
+    nodes.sort(key=lambda x: int(x), reverse=False)
     nodes.sort(key=lambda x: numberOfNeighbors(graph, x), reverse=True)
     return nodes[:budget]
 
@@ -217,7 +219,7 @@ def assignmentHeuristicTwo(graph, budget):
 
 '''
 myHeuristic
-Continuously pick a host who shares the least vertices (friends) with the other hostsself.
+Continuously pick a host who shares the least vertices (friends) with the other hosts.
 So we will have hosts with the maximum amount of unique neighbors.
 '''
 def myHeuristic(graph, budget):
@@ -231,7 +233,6 @@ def myHeuristic(graph, budget):
                 adjacents.add(neighbor)
             adjacents.add(v)
             hosts.append(v)
-
     return hosts
 
 '''
