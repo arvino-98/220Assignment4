@@ -234,7 +234,6 @@ def myHeuristic(graph, budget):
             adjacents.add(v)
             hosts.append(v)
     return hosts
-
 '''
 ////////////////////////////////////////////////////////
 End Heuristics
@@ -280,3 +279,7 @@ for i, graph in enumerate(testCaseGraphs):
         output.write("Average social awkwardness = ")
         output.write(str(computeSocialAwkwardness(testCaseGraphs[i], testCaseHostIDs[i])))
         output.write("\n")
+'''
+////////////////////////////////////////////////////////
+End writing
+'''
