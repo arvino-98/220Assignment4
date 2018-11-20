@@ -1,5 +1,5 @@
 import networkx as nx
-inputFile = 'sample_in.txt'
+inputFile = 'all_in.txt'
 
 '''
 Getting raw input
@@ -160,6 +160,24 @@ def computeSocialAwkwardness(graph, hostIds):
     for id in hostIds:
         setNodeDepths(graph, id)
     return '{:.2f}'.format(round((sumOfDepths(graph) / (nx.number_of_nodes(graph) - len(hostIds))), 2))
+
+'''
+mostUniqueFriends
+Find the node with most unique vertices
+'''
+def mostUniqueFriends(graph, adjacents):
+    max = 0
+    maxNode = None
+    for node in graph.nodes:
+        uniqueFriends = 0
+        for v in list(nx.all_neighbors(graph, node)):
+            if v not in adjacents:
+                uniqueFriends += 1
+        if uniqueFriends > max:
+            max = uniqueFriends
+            maxNode = node
+    return maxNode
+
 '''
 ////////////////////////////////////////////////////////
 End Utilities
@@ -188,6 +206,7 @@ them a party host. Repeat until M party hosts have been assigned. Ties should be
 resolved by choosing the person with a lower numerical ID.
 '''
 def assignmentHeuristicTwo(graph, budget):
+    # use a local copy since setNodeDepths() modifes given graph
     localGraphCopy = graph
     hosts = []
     hosts.append(mostNeighbors(localGraphCopy))
@@ -198,10 +217,23 @@ def assignmentHeuristicTwo(graph, budget):
 
 '''
 myHeuristic
-TODO
-Maybe: first pick host with most friends. then continuously pick a host who shares
-the least vertices (friends) with the other hosts
+Continuously pick a host who shares the least vertices (friends) with the other hostsself.
+So we will have hosts with the maximum amount of unique neighbors.
 '''
+def myHeuristic(graph, budget):
+    hosts = []
+    # a set of nodes that are adjacent to a host
+    adjacents = set([])
+    while len(hosts) < budget:
+        v = mostUniqueFriends(graph, adjacents)
+        if v not in hosts:
+            for neighbor in list(nx.all_neighbors(graph, v)):
+                adjacents.add(neighbor)
+            adjacents.add(v)
+            hosts.append(v)
+
+    return hosts
+
 '''
 ////////////////////////////////////////////////////////
 End Heuristics
@@ -212,20 +244,28 @@ Writing output
 ////////////////////////////////////////////////////////
 '''
 def writeHeuristicOne(graph, budget):
-    h1copy = graph.copy()
-    heuristicOneHostIds = assignmentHeuristicOne(h1copy, testCaseBudgets[i])
+    hcopy = graph.copy()
+    heuristicOneHostIds = assignmentHeuristicOne(hcopy, testCaseBudgets[i])
     output.write("Heuristic 1 hosts are ")
     output.write(str(heuristicOneHostIds) + "\n")
     output.write("Average social awkwardness = ")
-    output.write(str(computeSocialAwkwardness(h1copy, heuristicOneHostIds)) + "\n")
+    output.write(str(computeSocialAwkwardness(hcopy, heuristicOneHostIds)) + "\n")
 
 def writeHeuristicTwo(graph, budget):
-    h2copy = graph.copy()
-    heuristicTwoHostIds = assignmentHeuristicTwo(h2copy, testCaseBudgets[i])
+    hcopy = graph.copy()
+    heuristicTwoHostIds = assignmentHeuristicTwo(hcopy, testCaseBudgets[i])
     output.write("Heuristic 2 hosts are ")
     output.write(str(heuristicTwoHostIds) + "\n")
     output.write("Average social awkwardness = ")
-    output.write(str(computeSocialAwkwardness(h2copy, heuristicTwoHostIds)) + "\n")
+    output.write(str(computeSocialAwkwardness(hcopy, heuristicTwoHostIds)) + "\n")
+
+def writeMyHeuristic(graph, budget):
+    hcopy = graph.copy()
+    myHeuristicHostIds = myHeuristic(hcopy, testCaseBudgets[i])
+    output.write("My heuristic hosts are ")
+    output.write(str(myHeuristicHostIds) + "\n")
+    output.write("Average social awkwardness = ")
+    output.write(str(computeSocialAwkwardness(hcopy, myHeuristicHostIds)) + "\n")
 
 output = open("output.txt", "w")
 for i, graph in enumerate(testCaseGraphs):
@@ -233,6 +273,7 @@ for i, graph in enumerate(testCaseGraphs):
     if len(testCaseHostIDs[i]) == 0:
         writeHeuristicOne(testCaseGraphs[i], testCaseBudgets[i])
         writeHeuristicTwo(testCaseGraphs[i], testCaseBudgets[i])
+        writeMyHeuristic(testCaseGraphs[i], testCaseBudgets[i])
 
     elif len(testCaseHostIDs[i]) >= 1:
         output.write("Average social awkwardness = ")
