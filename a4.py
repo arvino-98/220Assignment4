@@ -9,7 +9,6 @@ rawInputArray = []
 with open(inputFile) as f:
     for line in f:
         rawInputArray.append(line.split())
-print rawInputArray
 '''
 ////////////////////////////////////////////////////////
 End raw input
@@ -32,11 +31,11 @@ numOfTestCases = int(rawInputArray[0][0])
 # we init is as 1 to start from the second line (since the first line specifies # of test cases)
 lineNum = 1
 for i in range(numOfTestCases):
-    print("test case " + str(i + 1))
+    #print("test case " + str(i + 1))
     G = nx.Graph()
 
     # get int values from the line
-    print(rawInputArray[lineNum])
+    #print(rawInputArray[lineNum])
     numberOfLinks = int(rawInputArray[lineNum][1])
     numberOfParties = int(rawInputArray[lineNum][2])
     numberOfHosts = int(rawInputArray[lineNum][3])
@@ -51,7 +50,7 @@ for i in range(numOfTestCases):
     for j in range(linkSliceLength):
         person1 = testCaseLinkSlice[j][0]
         person2 = testCaseLinkSlice[j][1]
-        print(person1 + " " + person2)
+        #print(person1 + " " + person2)
         # add to graph
         G.add_edge(person1, person2)
         G.add_node(person1, depth=-1)
@@ -67,13 +66,13 @@ for i in range(numOfTestCases):
     hostIds = []
     for k in range(hostSliceLength):
         hostIds.append(testCaseHostSlice[k][0])
-        print(testCaseHostSlice[k][0])
+        #print(testCaseHostSlice[k][0])
     testCaseHostIDs.append(hostIds)
 
     # moving to next line that has test case specifications
     lineNum += numberOfHosts
 
-    print("End test case")
+    #print("End test case")
 '''
 ////////////////////////////////////////////////////////
 End Parsing
@@ -243,37 +242,37 @@ End Heuristics
 Writing output
 ////////////////////////////////////////////////////////
 '''
-def writeHeuristicOne(graph, budget):
+def writeHeuristicOne(output,graph, budget):
     hcopy = graph.copy()
-    heuristicOneHostIds = assignmentHeuristicOne(hcopy, testCaseBudgets[i])
+    heuristicOneHostIds = assignmentHeuristicOne(hcopy, budget)
     output.write("Heuristic 1 hosts are ")
-    output.write(str(heuristicOneHostIds) + "\n")
+    output.write(','.join(heuristicOneHostIds) + "\n")
     output.write("Average social awkwardness = ")
     output.write(str(computeSocialAwkwardness(hcopy, heuristicOneHostIds)) + "\n")
 
-def writeHeuristicTwo(graph, budget):
+def writeHeuristicTwo(output,graph, budget):
     hcopy = graph.copy()
-    heuristicTwoHostIds = assignmentHeuristicTwo(hcopy, testCaseBudgets[i])
+    heuristicTwoHostIds = assignmentHeuristicTwo(hcopy, budget)
     output.write("Heuristic 2 hosts are ")
-    output.write(str(heuristicTwoHostIds) + "\n")
+    output.write(','.join(heuristicTwoHostIds) + "\n")
     output.write("Average social awkwardness = ")
     output.write(str(computeSocialAwkwardness(hcopy, heuristicTwoHostIds)) + "\n")
 
-def writeMyHeuristic(graph, budget):
+def writeMyHeuristic(output, graph, budget):
     hcopy = graph.copy()
-    myHeuristicHostIds = myHeuristic(hcopy, testCaseBudgets[i])
+    myHeuristicHostIds = myHeuristic(hcopy, budget)
     output.write("My heuristic hosts are ")
-    output.write(str(myHeuristicHostIds) + "\n")
+    output.write(','.join(myHeuristicHostIds) + "\n")
     output.write("Average social awkwardness = ")
     output.write(str(computeSocialAwkwardness(hcopy, myHeuristicHostIds)) + "\n")
 
 output = open("output.txt", "w")
 for i, graph in enumerate(testCaseGraphs):
-    output.write("Test case " + str(i+1) + ".\n")
+    output.write("Test Case " + str(i+1) + ".\n")
     if len(testCaseHostIDs[i]) == 0:
-        writeHeuristicOne(testCaseGraphs[i], testCaseBudgets[i])
-        writeHeuristicTwo(testCaseGraphs[i], testCaseBudgets[i])
-        writeMyHeuristic(testCaseGraphs[i], testCaseBudgets[i])
+        writeHeuristicOne(output, testCaseGraphs[i], testCaseBudgets[i])
+        writeHeuristicTwo(output, testCaseGraphs[i], testCaseBudgets[i])
+        writeMyHeuristic(output, testCaseGraphs[i], testCaseBudgets[i])
 
     elif len(testCaseHostIDs[i]) >= 1:
         output.write("Average social awkwardness = ")
